@@ -8,7 +8,8 @@ Tracks all 18 rotating rares + Voice of the Eclipse for the **Two Minutes to Mid
 
 - **Live rotation timer** - Knows exactly which rare is active and when the next one spawns based on the fixed EST schedule. No sync needed.
 - **"Go To" indicator** - Highlights the next unkilled rare in the rotation with coordinates and time until it spawns.
-- **Kill tracking** - Automatically detects kills via boss kill events, targeting, and mouseover. Persists across sessions.
+- **Kill tracking** - Automatically detects kills via boss kill events, targeting, mouseover, and loot pickup. Persists across sessions.
+- **Manual kill marking** - Use `/tt kill #` to manually mark any rare as killed if auto-detection misses it.
 - **Progress bar** - Visual tracker showing how many of the 19 rares you've defeated.
 - **Coordinates** - Every rare's location displayed in the tracker and in tooltips.
 - **Waypoint support** - Click any row to set a waypoint. Works with TomTom (arrow) or WoW's built-in map pin + supertrack arrow.
@@ -54,6 +55,8 @@ The 18 rares cycle every 3 hours on a fixed 10-minute rotation across 6 location
 | `/tt show` | Show the tracker |
 | `/tt hide` | Hide the tracker |
 | `/tt wp` | Set a waypoint to the next unkilled rare |
+| `/tt kill #` | Manually mark rare # (1-18) as killed |
+| `/tt kill eclipse` | Manually mark Voice of the Eclipse as killed |
 | `/tt status` | Print progress and missing rares to chat |
 | `/tt reset` | Clear all kill data |
 | `/tt help` | Show available commands |
