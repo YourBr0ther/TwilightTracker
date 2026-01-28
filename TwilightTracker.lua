@@ -756,6 +756,26 @@ function TwilightTracker_OnEvent(self, event, ...)
             end
         end
 
+    elseif event == "ENCOUNTER_LOOT_RECEIVED" then
+        -- If we received loot from an encounter, check if target is a tracked rare
+        if UnitExists("target") then
+            local guid = UnitGUID("target")
+            local npcID = GetNPCIDFromGUID(guid)
+            if npcID and NPC_TO_INDEX[npcID] then
+                RegisterKill(npcID)
+            end
+        end
+
+    elseif event == "LOOT_OPENED" then
+        -- When looting, check if target is a tracked dead rare
+        if UnitExists("target") then
+            local guid = UnitGUID("target")
+            local npcID = GetNPCIDFromGUID(guid)
+            if npcID and NPC_TO_INDEX[npcID] then
+                RegisterKill(npcID)
+            end
+        end
+
     elseif event == "CRITERIA_EARNED" then
         UpdateUI()
     end
@@ -822,17 +842,37 @@ SlashCmdList["TWILIGHTTRACKER"] = function(msg)
             print(Col("[Twilight Tracker]", C_GREEN) .. " All rares defeated!")
         end
 
+    elseif msg:match("^kill%s+(%d+)$") then
+        local idx = tonumber(msg:match("^kill%s+(%d+)$"))
+        if idx >= 1 and idx <= NUM_RARES then
+            local r = ROTATION[idx]
+            MarkKilled(r.npcID)
+            print(Col("[Twilight Tracker]", C_GOLD) ..
+                " Manually marked " .. Col(r.name, C_GREEN) .. " as killed.")
+            UpdateUI()
+        else
+            print(Col("[Twilight Tracker]", C_RED) .. " Invalid. Use 1-" .. NUM_RARES)
+        end
+
+    elseif msg == "kill eclipse" then
+        MarkKilled(VOICE_OF_ECLIPSE.npcID)
+        print(Col("[Twilight Tracker]", C_GOLD) ..
+            " Manually marked " .. Col(VOICE_OF_ECLIPSE.name, C_GREEN) .. " as killed.")
+        UpdateUI()
+
     elseif msg == "help" then
         print(Col("[Twilight Tracker] Commands:", C_GOLD))
         print("  " .. Col("/tt", C_CYAN) .. "           Toggle window")
         print("  " .. Col("/tt show", C_CYAN) .. "      Show window")
         print("  " .. Col("/tt hide", C_CYAN) .. "      Hide window")
-        print("  " .. Col("/tt wp", C_CYAN) .. "        Set TomTom waypoint to next unkilled")
+        print("  " .. Col("/tt wp", C_CYAN) .. "        Set waypoint to next unkilled")
+        print("  " .. Col("/tt kill #", C_CYAN) .. "    Manually mark rare # as killed (1-18)")
+        print("  " .. Col("/tt kill eclipse", C_CYAN) .. " Mark Voice of the Eclipse as killed")
         print("  " .. Col("/tt status", C_CYAN) .. "    Print progress + missing rares")
         print("  " .. Col("/tt reset", C_CYAN) .. "     Clear all kill data")
         print("  " .. Col("/tt help", C_CYAN) .. "      This help text")
         print(" ")
-        print("  " .. Col("Click any row", C_DIM) .. " to set a TomTom waypoint (if installed)")
+        print("  " .. Col("Click any row", C_DIM) .. " to set a waypoint")
         print("  " .. Col("Drag title bar", C_DIM) .. " to reposition the window")
     else
         print(Col("[Twilight Tracker]", C_RED) ..
