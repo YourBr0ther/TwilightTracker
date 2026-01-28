@@ -3,7 +3,11 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
     <Frame name="TwilightTrackerEventFrame" hidden="true" parent="UIParent">
         <Scripts>
-            <OnEvent function="TwilightTracker_OnEvent"/>
+            <OnEvent>
+                if TwilightTracker_OnEvent then
+                    TwilightTracker_OnEvent(self, event, ...)
+                end
+            </OnEvent>
             <OnLoad>
                 self:RegisterEvent("ADDON_LOADED");
                 self:RegisterEvent("BOSS_KILL");
