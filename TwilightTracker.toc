@@ -1,0 +1,8 @@
+## Interface: 120000
+## Title: Twilight Tracker - Prepatch Rare Tracker
+## Notes: Tracks the Midnight prepatch Twilight Ascension rare spawn rotation, timers, and kill progress for the Two Minutes to Midnight achievement.
+## Author: Chris
+## Version: 1.0.0
+## SavedVariables: TwilightTrackerDB
+
+TwilightTracker.lua
