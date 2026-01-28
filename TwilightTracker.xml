@@ -6,7 +6,6 @@
             <OnEvent function="TwilightTracker_OnEvent"/>
             <OnLoad>
                 self:RegisterEvent("ADDON_LOADED");
-                self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
                 self:RegisterEvent("BOSS_KILL");
                 self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED");
                 self:RegisterEvent("PLAYER_TARGET_CHANGED");

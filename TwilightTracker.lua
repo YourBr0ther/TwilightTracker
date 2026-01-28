@@ -718,16 +718,7 @@ function TwilightTracker_OnEvent(self, event, ...)
 
     if not initialized then return end
 
-    if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local _, subEvent, _, _, _, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
-        if (subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL") and destGUID then
-            local npcID = GetNPCIDFromGUID(destGUID)
-            if npcID and NPC_TO_INDEX[npcID] then
-                RegisterKill(npcID)
-            end
-        end
-
-    elseif event == "BOSS_KILL" then
+    if event == "BOSS_KILL" then
         local _, encounterName = ...
         if encounterName then
             local npcID = NAME_TO_NPC[encounterName:lower()]
