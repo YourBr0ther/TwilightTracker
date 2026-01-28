@@ -6,7 +6,6 @@
 -------------------------------------------------------------------------------
 
 local ADDON_NAME = "TwilightTracker"
-TwilightTrackerDB = TwilightTrackerDB or {}
 
 -------------------------------------------------------------------------------
 -- Rare data: fixed rotation order, NPC IDs, coordinates
@@ -109,7 +108,6 @@ local rows = {}
 local eclipseRow
 local headerText, timerText, goToText
 local progressBar, progressText
-local isCollapsed = false
 
 -------------------------------------------------------------------------------
 -- Utility
@@ -293,7 +291,7 @@ local function RegisterKill(npcID)
                 Col("ALL RARES DEFEATED! Achievement complete!", C_GREEN))
         end
     end
-    if UpdateUI then UpdateUI() end
+    UpdateUI()
 end
 
 -------------------------------------------------------------------------------
@@ -566,7 +564,7 @@ local function BuildUI()
     local progFill = progFrame:CreateTexture(nil, "ARTWORK")
     progFill:SetPoint("TOPLEFT", progFrame, "TOPLEFT", 1, -1)
     progFill:SetHeight(PROGRESS_HEIGHT + 2)
-    progFill:SetColorTexture(0.25, 0.75, 1.0, 0.9)
+    progFill:SetColorTexture(0.85, 0.85, 0.85, 0.5)
     progressBar = progFill
 
     progressText = progFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -600,7 +598,6 @@ local function BuildUI()
 
     -- Collapse logic
     local function SetCollapsed(state)
-        isCollapsed = state
         db.collapsed = state
         if state then
             contentFrame:Hide()
@@ -612,7 +609,7 @@ local function BuildUI()
             mainFrame:SetHeight(totalHeight)
         end
     end
-    collapseBtn:SetScript("OnClick", function() SetCollapsed(not isCollapsed) end)
+    collapseBtn:SetScript("OnClick", function() SetCollapsed(not db.collapsed) end)
     SetCollapsed(db.collapsed or false)
 end
 
@@ -699,11 +696,15 @@ function TwilightTracker_OnEvent(self, event, ...)
         local name = ...
         if name ~= ADDON_NAME then return end
 
+        TwilightTrackerDB = TwilightTrackerDB or {}
         db = TwilightTrackerDB
         if not db.kills then db.kills = {} end
         BuildUI()
         if db.hidden then mainFrame:Hide() end
         initialized = true
+
+        -- Start UI update ticker now that we're initialized
+        C_Timer.NewTicker(0.5, function() UpdateUI() end)
 
         local tomtomNote = HasTomTom()
             and Col("TomTom", C_GREEN) .. Col(" detected - click rows for arrow waypoints", C_DIM)
@@ -727,12 +728,12 @@ function TwilightTracker_OnEvent(self, event, ...)
 
     elseif event == "VIGNETTE_MINIMAP_UPDATED" then
         local vignetteGUID = ...
-        if vignetteGUID and C_VignetteInfo then
+        if vignetteGUID and C_VignetteInfo and C_VignetteInfo.GetVignetteInfo then
             local info = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
             if info and info.objectGUID then
                 local npcID = GetNPCIDFromGUID(info.objectGUID)
                 if npcID and NPC_TO_INDEX[npcID] then
-                    if UpdateUI then UpdateUI() end
+                    UpdateUI()
                 end
             end
         end
@@ -756,14 +757,10 @@ function TwilightTracker_OnEvent(self, event, ...)
         end
 
     elseif event == "CRITERIA_EARNED" then
-        if UpdateUI then UpdateUI() end
+        UpdateUI()
     end
 end
 
--- Tick for countdown updates (C_Timer avoids frame-based OnUpdate)
-C_Timer.NewTicker(0.5, function()
-    if UpdateUI then UpdateUI() end
-end)
 
 -------------------------------------------------------------------------------
 -- Slash commands
@@ -821,9 +818,6 @@ SlashCmdList["TWILIGHTTRACKER"] = function(msg)
         if goIdx then
             local r = ROTATION[goIdx]
             SetWaypoint(r.x, r.y, r.name)
-            print(Col("[Twilight Tracker]", C_GOLD) ..
-                " Waypoint set: " .. Col(r.name, C_CYAN) ..
-                Col(string.format(" (%.1f, %.1f)", r.x, r.y), C_COORD))
         else
             print(Col("[Twilight Tracker]", C_GREEN) .. " All rares defeated!")
         end
