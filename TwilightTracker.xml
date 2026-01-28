@@ -1,0 +1,18 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+    <Frame name="TwilightTrackerEventFrame" hidden="true" parent="UIParent">
+        <Scripts>
+            <OnEvent function="TwilightTracker_OnEvent"/>
+            <OnLoad>
+                self:RegisterEvent("ADDON_LOADED");
+                self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED");
+                self:RegisterEvent("BOSS_KILL");
+                self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED");
+                self:RegisterEvent("PLAYER_TARGET_CHANGED");
+                self:RegisterEvent("UPDATE_MOUSEOVER_UNIT");
+                self:RegisterEvent("CRITERIA_EARNED");
+            </OnLoad>
+        </Scripts>
+    </Frame>
+</Ui>

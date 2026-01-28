@@ -688,99 +688,86 @@ UpdateUI = function()
 end
 
 -------------------------------------------------------------------------------
--- Event handling via EventRegistry
--- All registrations at top level to avoid tainted callback context
+-- Event handling via XML-registered frame (TwilightTrackerEventFrame)
+-- Events are registered in TwilightTracker.xml OnLoad to avoid taint.
+-- The global function TwilightTracker_OnEvent is called by the XML frame.
 -------------------------------------------------------------------------------
 local initialized = false
 
--- ADDON_LOADED: init DB and build UI
-EventRegistry:RegisterFrameEventAndCallback("ADDON_LOADED", function(event, name)
-    if name ~= ADDON_NAME then return end
+function TwilightTracker_OnEvent(self, event, ...)
+    if event == "ADDON_LOADED" then
+        local name = ...
+        if name ~= ADDON_NAME then return end
 
-    db = TwilightTrackerDB
-    if not db.kills then db.kills = {} end
-    BuildUI()
-    if db.hidden then mainFrame:Hide() end
-    initialized = true
+        db = TwilightTrackerDB
+        if not db.kills then db.kills = {} end
+        BuildUI()
+        if db.hidden then mainFrame:Hide() end
+        initialized = true
 
-    local tomtomNote = HasTomTom()
-        and Col("TomTom", C_GREEN) .. Col(" detected - click rows for arrow waypoints", C_DIM)
-        or Col("Click any row to set a map waypoint + tracking arrow", C_DIM)
-    print(Col("[Twilight Tracker]", C_GOLD) .. " loaded  |  " ..
-        Col("/tt", C_CYAN) .. " toggle  |  " ..
-        Col("/tt help", C_CYAN) .. " cmds")
-    print(Col("[Twilight Tracker]", C_GOLD) .. " " .. tomtomNote)
-end, ADDON_NAME)
-
--- Safely register events - some may be protected in 12.0.0
-local function SafeRegister(event, callback)
-    pcall(EventRegistry.RegisterFrameEventAndCallback, EventRegistry, event, callback, ADDON_NAME)
-end
-
--- Combat log: primary kill detection
-SafeRegister("COMBAT_LOG_EVENT_UNFILTERED", function()
-    if not initialized then return end
-    local _, subEvent, _, _, _, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
-    if (subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL") and destGUID then
-        local npcID = GetNPCIDFromGUID(destGUID)
-        if npcID and NPC_TO_INDEX[npcID] then
-            RegisterKill(npcID)
-        end
+        local tomtomNote = HasTomTom()
+            and Col("TomTom", C_GREEN) .. Col(" detected - click rows for arrow waypoints", C_DIM)
+            or Col("Click any row to set a map waypoint + tracking arrow", C_DIM)
+        print(Col("[Twilight Tracker]", C_GOLD) .. " loaded  |  " ..
+            Col("/tt", C_CYAN) .. " toggle  |  " ..
+            Col("/tt help", C_CYAN) .. " cmds")
+        print(Col("[Twilight Tracker]", C_GOLD) .. " " .. tomtomNote)
+        self:UnregisterEvent("ADDON_LOADED")
+        return
     end
-end)
 
--- Boss kill: backup for boss-flagged rares
-SafeRegister("BOSS_KILL", function(event, encounterID, encounterName)
     if not initialized then return end
-    if encounterName then
-        local npcID = NAME_TO_NPC[encounterName:lower()]
-        if npcID then RegisterKill(npcID) end
-    end
-end)
 
--- Vignette: UI refresh when rare icon appears on minimap
-SafeRegister("VIGNETTE_MINIMAP_UPDATED", function(event, vignetteGUID)
-    if not initialized then return end
-    if vignetteGUID and C_VignetteInfo then
-        local info = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
-        if info and info.objectGUID then
-            local npcID = GetNPCIDFromGUID(info.objectGUID)
+    if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        local _, subEvent, _, _, _, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
+        if (subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL") and destGUID then
+            local npcID = GetNPCIDFromGUID(destGUID)
             if npcID and NPC_TO_INDEX[npcID] then
-                if UpdateUI then UpdateUI() end
+                RegisterKill(npcID)
             end
         end
-    end
-end)
 
--- Target: detect dead rares
-SafeRegister("PLAYER_TARGET_CHANGED", function()
-    if not initialized then return end
-    if UnitExists("target") then
-        local guid = UnitGUID("target")
-        local npcID = GetNPCIDFromGUID(guid)
-        if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("target") then
-            RegisterKill(npcID)
+    elseif event == "BOSS_KILL" then
+        local _, encounterName = ...
+        if encounterName then
+            local npcID = NAME_TO_NPC[encounterName:lower()]
+            if npcID then RegisterKill(npcID) end
         end
-    end
-end)
 
--- Mouseover: detect dead rares
-SafeRegister("UPDATE_MOUSEOVER_UNIT", function()
-    if not initialized then return end
-    if UnitExists("mouseover") then
-        local guid = UnitGUID("mouseover")
-        local npcID = GetNPCIDFromGUID(guid)
-        if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("mouseover") then
-            RegisterKill(npcID)
+    elseif event == "VIGNETTE_MINIMAP_UPDATED" then
+        local vignetteGUID = ...
+        if vignetteGUID and C_VignetteInfo then
+            local info = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+            if info and info.objectGUID then
+                local npcID = GetNPCIDFromGUID(info.objectGUID)
+                if npcID and NPC_TO_INDEX[npcID] then
+                    if UpdateUI then UpdateUI() end
+                end
+            end
         end
-    end
-end)
 
--- Achievement criteria
-SafeRegister("CRITERIA_EARNED", function()
-    if not initialized then return end
-    if UpdateUI then UpdateUI() end
-end)
+    elseif event == "PLAYER_TARGET_CHANGED" then
+        if UnitExists("target") then
+            local guid = UnitGUID("target")
+            local npcID = GetNPCIDFromGUID(guid)
+            if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("target") then
+                RegisterKill(npcID)
+            end
+        end
+
+    elseif event == "UPDATE_MOUSEOVER_UNIT" then
+        if UnitExists("mouseover") then
+            local guid = UnitGUID("mouseover")
+            local npcID = GetNPCIDFromGUID(guid)
+            if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("mouseover") then
+                RegisterKill(npcID)
+            end
+        end
+
+    elseif event == "CRITERIA_EARNED" then
+        if UpdateUI then UpdateUI() end
+    end
+end
 
 -- Tick for countdown updates (C_Timer avoids frame-based OnUpdate)
 C_Timer.NewTicker(0.5, function()
