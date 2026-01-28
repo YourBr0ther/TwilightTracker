@@ -70,36 +70,35 @@ NAME_TO_NPC[VOICE_OF_ECLIPSE.name:lower()] = VOICE_OF_ECLIPSE.npcID
 -------------------------------------------------------------------------------
 -- Visual constants
 -------------------------------------------------------------------------------
-local FRAME_WIDTH     = 340
-local ROW_HEIGHT      = 22
-local HEADER_HEIGHT   = 76
-local PADDING         = 10
-local PROGRESS_HEIGHT = 12
+local FRAME_WIDTH     = 300
+local ROW_HEIGHT      = 20
+local HEADER_HEIGHT   = 68
+local PADDING         = 8
+local PROGRESS_HEIGHT = 8
 
--- Colors (font string format: {r, g, b})
+-- Colors - clean neutral palette, no purple
 local C_GOLD    = { r = 1.00, g = 0.82, b = 0.00 }
-local C_GREEN   = { r = 0.30, g = 1.00, b = 0.30 }
-local C_RED     = { r = 1.00, g = 0.30, b = 0.30 }
-local C_WHITE   = { r = 0.90, g = 0.90, b = 0.90 }
-local C_GRAY    = { r = 0.45, g = 0.45, b = 0.45 }
-local C_CYAN    = { r = 0.40, g = 0.85, b = 1.00 }
-local C_PURPLE  = { r = 0.70, g = 0.50, b = 1.00 }
-local C_DIM     = { r = 0.55, g = 0.55, b = 0.55 }
-local C_KILLED  = { r = 0.20, g = 0.65, b = 0.20 }
+local C_GREEN   = { r = 0.30, g = 0.90, b = 0.30 }
+local C_RED     = { r = 0.90, g = 0.25, b = 0.25 }
+local C_WHITE   = { r = 0.85, g = 0.85, b = 0.85 }
+local C_GRAY    = { r = 0.40, g = 0.40, b = 0.40 }
+local C_CYAN    = { r = 0.40, g = 0.80, b = 1.00 }
+local C_DIM     = { r = 0.50, g = 0.50, b = 0.50 }
+local C_KILLED  = { r = 0.25, g = 0.60, b = 0.25 }
 local C_ORANGE  = { r = 1.00, g = 0.60, b = 0.15 }
-local C_COORD   = { r = 0.70, g = 0.70, b = 0.85 }
+local C_COORD   = { r = 0.60, g = 0.60, b = 0.60 }
 
--- Background colors (RGBA arrays for SetColorTexture)
-local BG_DARK   = { 0.06, 0.06, 0.10, 0.92 }
-local BG_TITLE  = { 0.12, 0.08, 0.20, 1.00 }
-local BG_ROW_A  = { 1, 1, 1, 0.02 }
-local BG_ROW_B  = { 1, 1, 1, 0.055 }
-local BG_HOVER  = { 1, 1, 1, 0.10 }
-local BG_NOW    = { 1.0, 0.82, 0.0, 0.14 }
-local BG_NEXT   = { 0.4, 0.85, 1.0, 0.10 }
-local BG_GOTO   = { 1.0, 0.60, 0.15, 0.16 }
-local BORDER_C  = { 0.40, 0.30, 0.60, 0.90 }
-local PROG_BG   = { 0.10, 0.10, 0.16, 1.0 }
+-- Background colors - neutral darks, no purple tints
+local BG_DARK   = { 0.07, 0.07, 0.07, 0.90 }
+local BG_TITLE  = { 0.10, 0.10, 0.10, 1.00 }
+local BG_ROW_A  = { 0, 0, 0, 0 }
+local BG_ROW_B  = { 1, 1, 1, 0.03 }
+local BG_HOVER  = { 1, 1, 1, 0.07 }
+local BG_NOW    = { 1.0, 0.82, 0.0, 0.10 }
+local BG_NEXT   = { 0.4, 0.80, 1.0, 0.06 }
+local BG_GOTO   = { 1.0, 0.60, 0.15, 0.10 }
+local BORDER_C  = { 0.25, 0.25, 0.25, 0.80 }
+local PROG_BG   = { 0.12, 0.12, 0.12, 1.0 }
 
 -------------------------------------------------------------------------------
 -- State
@@ -326,11 +325,11 @@ local function CreateRow(parent, index, rare, yOffset)
         local r = self.rare
         GameTooltip:AddLine(r.name, C_GOLD.r, C_GOLD.g, C_GOLD.b)
         if r.x and r.y then
-            GameTooltip:AddLine(string.format("Location: %.1f, %.1f", r.x, r.y), 0.7, 0.7, 0.85)
+            GameTooltip:AddLine(string.format("Location: %.1f, %.1f", r.x, r.y), 0.6, 0.6, 0.6)
         end
         if r.locations then
             for _, loc in ipairs(r.locations) do
-                GameTooltip:AddLine(string.format("%s: %.1f, %.1f", loc.label, loc.x, loc.y), 0.7, 0.7, 0.85)
+                GameTooltip:AddLine(string.format("%s: %.1f, %.1f", loc.label, loc.x, loc.y), 0.6, 0.6, 0.6)
             end
         end
         if IsKilled(r.npcID) then
@@ -409,7 +408,7 @@ local function UpdateRow(row, currentIdx, goToIdx)
     elseif idx then
         row.checkLabel:SetText(Col(tostring(idx), C_DIM))
     else
-        row.checkLabel:SetText(Col("*", C_PURPLE))
+        row.checkLabel:SetText(Col("*", C_DIM))
     end
 
     -- Row highlight
@@ -466,7 +465,7 @@ local function BuildUI()
     local listHeight = (NUM_RARES + 2) * ROW_HEIGHT  -- +2 for separator + eclipse
     local totalHeight = HEADER_HEIGHT + listHeight + PROGRESS_HEIGHT + 18
 
-    mainFrame = CreateFrame("Frame", "TwilightTrackerFrame", UIParent, "BackdropTemplate")
+    mainFrame = CreateFrame("Frame", "TwilightTrackerFrame", UIParent)
     mainFrame:SetSize(FRAME_WIDTH, totalHeight)
     mainFrame:SetPoint("RIGHT", UIParent, "RIGHT", -30, 0)
     mainFrame:SetMovable(true)
@@ -479,14 +478,27 @@ local function BuildUI()
         local point, _, relPoint, x, y = self:GetPoint()
         db.pos = { point = point, relPoint = relPoint, x = x, y = y }
     end)
-    mainFrame:SetBackdrop({
-        bgFile   = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        edgeSize = 1,
-    })
-    mainFrame:SetBackdropColor(unpack(BG_DARK))
-    mainFrame:SetBackdropBorderColor(unpack(BORDER_C))
     mainFrame:SetFrameStrata("MEDIUM")
+
+    -- Background
+    local mainBG = mainFrame:CreateTexture(nil, "BACKGROUND")
+    mainBG:SetAllPoints()
+    mainBG:SetColorTexture(unpack(BG_DARK))
+
+    -- Border (4 edge lines)
+    local function MakeBorder(parent, c)
+        local t = parent:CreateTexture(nil, "BORDER")
+        t:SetColorTexture(c[1], c[2], c[3], c[4])
+        return t
+    end
+    local bTop = MakeBorder(mainFrame, BORDER_C)
+    bTop:SetPoint("TOPLEFT"); bTop:SetPoint("TOPRIGHT"); bTop:SetHeight(1)
+    local bBot = MakeBorder(mainFrame, BORDER_C)
+    bBot:SetPoint("BOTTOMLEFT"); bBot:SetPoint("BOTTOMRIGHT"); bBot:SetHeight(1)
+    local bLeft = MakeBorder(mainFrame, BORDER_C)
+    bLeft:SetPoint("TOPLEFT"); bLeft:SetPoint("BOTTOMLEFT"); bLeft:SetWidth(1)
+    local bRight = MakeBorder(mainFrame, BORDER_C)
+    bRight:SetPoint("TOPRIGHT"); bRight:SetPoint("BOTTOMRIGHT"); bRight:SetWidth(1)
 
     if db.pos then
         mainFrame:ClearAllPoints()
@@ -495,67 +507,61 @@ local function BuildUI()
 
     -- Title bar
     local titleBar = CreateFrame("Frame", nil, mainFrame)
-    titleBar:SetHeight(22)
+    titleBar:SetHeight(18)
     titleBar:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 1, -1)
     titleBar:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -1, -1)
     local titleBG = titleBar:CreateTexture(nil, "BACKGROUND")
     titleBG:SetAllPoints()
     titleBG:SetColorTexture(unpack(BG_TITLE))
 
-    local titleStr = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local titleStr = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     titleStr:SetPoint("CENTER", titleBar, "CENTER", 0, 0)
-    titleStr:SetText(Col("Twilight Tracker", C_GOLD))
+    titleStr:SetText(Col("TWILIGHT TRACKER", C_DIM))
 
-    -- Close (custom button to avoid UIPanelCloseButton taint)
+    -- Close
     local closeBtn = CreateFrame("Button", nil, mainFrame)
-    closeBtn:SetSize(22, 22)
-    closeBtn:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -2, -2)
-    closeBtn:SetNormalFontObject("GameFontNormal")
-    closeBtn:SetHighlightFontObject("GameFontHighlight")
-    local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    closeBtn:SetSize(18, 18)
+    closeBtn:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -2, -1)
+    local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     closeTxt:SetPoint("CENTER")
-    closeTxt:SetText(Col("X", C_RED))
-    closeBtn:SetScript("OnEnter", function() closeTxt:SetText(Col("X", C_WHITE)) end)
-    closeBtn:SetScript("OnLeave", function() closeTxt:SetText(Col("X", C_RED)) end)
+    closeTxt:SetText(Col("x", C_DIM))
+    closeBtn:SetScript("OnEnter", function() closeTxt:SetText(Col("x", C_WHITE)) end)
+    closeBtn:SetScript("OnLeave", function() closeTxt:SetText(Col("x", C_DIM)) end)
     closeBtn:SetScript("OnClick", function() mainFrame:Hide(); db.hidden = true end)
 
     -- Collapse
     local collapseBtn = CreateFrame("Button", nil, mainFrame)
-    collapseBtn:SetSize(22, 22)
-    collapseBtn:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 2, 0)
+    collapseBtn:SetSize(18, 18)
+    collapseBtn:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 3, -1)
     collapseBtn:EnableMouse(true)
     local collLabel = collapseBtn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     collLabel:SetAllPoints()
 
     -- Header: current rare + timer
-    headerText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    headerText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     headerText:SetPoint("TOP", titleBar, "BOTTOM", 0, -4)
-    headerText:SetWidth(FRAME_WIDTH - 16)
+    headerText:SetWidth(FRAME_WIDTH - 12)
     headerText:SetJustifyH("CENTER")
 
     timerText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    timerText:SetPoint("TOP", headerText, "BOTTOM", 0, -1)
-    timerText:SetWidth(FRAME_WIDTH - 16)
+    timerText:SetPoint("TOP", headerText, "BOTTOM", 0, -2)
+    timerText:SetWidth(FRAME_WIDTH - 12)
     timerText:SetJustifyH("CENTER")
 
     -- "Go to" indicator (next unkilled)
     goToText = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    goToText:SetPoint("TOP", timerText, "BOTTOM", 0, -1)
-    goToText:SetWidth(FRAME_WIDTH - 16)
+    goToText:SetPoint("TOP", timerText, "BOTTOM", 0, -2)
+    goToText:SetWidth(FRAME_WIDTH - 12)
     goToText:SetJustifyH("CENTER")
 
     -- Progress bar
-    local progFrame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
+    local progFrame = CreateFrame("Frame", nil, mainFrame)
     progFrame:SetHeight(PROGRESS_HEIGHT + 4)
     progFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", PADDING, -(HEADER_HEIGHT - 2))
     progFrame:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -PADDING, -(HEADER_HEIGHT - 2))
-    progFrame:SetBackdrop({
-        bgFile   = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        edgeSize = 1,
-    })
-    progFrame:SetBackdropColor(unpack(PROG_BG))
-    progFrame:SetBackdropBorderColor(0.25, 0.25, 0.40, 0.8)
+    local progBG = progFrame:CreateTexture(nil, "BACKGROUND")
+    progBG:SetAllPoints()
+    progBG:SetColorTexture(unpack(PROG_BG))
 
     local progFill = progFrame:CreateTexture(nil, "ARTWORK")
     progFill:SetPoint("TOPLEFT", progFrame, "TOPLEFT", 1, -1)
@@ -573,7 +579,7 @@ local function BuildUI()
     contentFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", 0, 0)
 
     local sep = contentFrame:CreateTexture(nil, "ARTWORK")
-    sep:SetColorTexture(BORDER_C[1], BORDER_C[2], BORDER_C[3], 0.4)
+    sep:SetColorTexture(1, 1, 1, 0.08)
     sep:SetSize(FRAME_WIDTH - 2, 1)
     sep:SetPoint("TOP", contentFrame, "TOP", 0, 0)
 
@@ -585,7 +591,7 @@ local function BuildUI()
 
     -- Separator
     local sep2 = contentFrame:CreateTexture(nil, "ARTWORK")
-    sep2:SetColorTexture(BORDER_C[1], BORDER_C[2], BORDER_C[3], 0.4)
+    sep2:SetColorTexture(1, 1, 1, 0.08)
     sep2:SetSize(FRAME_WIDTH - 20, 1)
     sep2:SetPoint("TOP", contentFrame, "TOP", 0, yOff - 2)
     yOff = yOff - 6
@@ -625,32 +631,28 @@ UpdateUI = function()
     local maxBarW = FRAME_WIDTH - 2 * PADDING - 2
     progressBar:SetWidth(math.max(1, maxBarW * pct))
     if killed == total then
-        progressBar:SetColorTexture(0.3, 1.0, 0.3, 1.0)
-        progressText:SetText(Col("COMPLETE " .. killed .. "/" .. total, C_GREEN))
+        progressBar:SetColorTexture(0.25, 0.75, 0.25, 0.9)
+        progressText:SetText(Col(killed .. "/" .. total, C_GREEN))
     else
-        progressBar:SetColorTexture(0.25, 0.70, 1.0, 0.9)
-        progressText:SetText(Col(killed .. " / " .. total .. " defeated", C_WHITE))
+        progressBar:SetColorTexture(0.85, 0.85, 0.85, 0.5)
+        progressText:SetText(Col(killed .. "/" .. total, C_WHITE))
     end
 
     -- Current rare header
     local cur = ROTATION[currentIdx]
     local curKilled = IsKilled(cur.npcID)
     local curColor = curKilled and C_GRAY or C_GOLD
-    local prefix = curKilled and "" or ">> "
-    local suffix = curKilled and "" or " <<"
-    headerText:SetText(
-        Col("Active:  ", C_DIM) .. Col(prefix .. cur.name .. suffix, curColor)
-    )
+    headerText:SetText(Col(cur.name, curColor))
 
-    -- Timer to next
+    -- Timer + next
     local nxt = ROTATION[nextIdx]
     local nxtColor = IsKilled(nxt.npcID) and C_GRAY or C_CYAN
     timerText:SetText(
-        Col("Next: ", C_DIM) .. Col(nxt.name, nxtColor) ..
-        Col("  in  ", C_DIM) .. Col(FormatTime(remaining), C_GOLD)
+        Col(nxt.name, nxtColor) ..
+        Col(" in ", C_DIM) .. Col(FormatTime(remaining), C_WHITE)
     )
 
-    -- "Go to" - find next unkilled rare
+    -- "Go to" - next unkilled
     local goToIdx = nil
     if killed < total then
         goToIdx = GetNextUnkilled(currentIdx)
@@ -658,27 +660,24 @@ UpdateUI = function()
             local goRare = ROTATION[goToIdx]
             if goToIdx == currentIdx then
                 goToText:SetText(
-                    Col("Go to:  ", C_DIM) ..
                     Col(goRare.name, C_ORANGE) ..
-                    Col(string.format("  (%.1f, %.1f)", goRare.x, goRare.y), C_COORD) ..
-                    Col("  - Active now!", C_GOLD)
+                    Col(string.format(" (%.1f, %.1f)", goRare.x, goRare.y), C_COORD) ..
+                    Col(" - now", C_GOLD)
                 )
             else
-                -- How many slots away?
                 local slotsAway = ((goToIdx - currentIdx) % NUM_RARES)
                 local secsAway = (slotsAway - 1) * SLOT_SECONDS + remaining
                 goToText:SetText(
-                    Col("Go to:  ", C_DIM) ..
                     Col(goRare.name, C_ORANGE) ..
-                    Col(string.format("  (%.1f, %.1f)", goRare.x, goRare.y), C_COORD) ..
-                    Col("  in " .. FormatTime(secsAway), C_GOLD)
+                    Col(string.format(" (%.1f, %.1f)", goRare.x, goRare.y), C_COORD) ..
+                    Col(" in " .. FormatTime(secsAway), C_DIM)
                 )
             end
         else
             goToText:SetText("")
         end
     else
-        goToText:SetText(Col("All rares defeated!", C_GREEN))
+        goToText:SetText(Col("All defeated", C_GREEN))
     end
 
     -- Update rows
@@ -689,107 +688,103 @@ UpdateUI = function()
 end
 
 -------------------------------------------------------------------------------
--- Event handling (multiple kill detection methods)
+-- Event handling via EventRegistry
+-- All registrations at top level to avoid tainted callback context
 -------------------------------------------------------------------------------
-local eventFrame = CreateFrame("Frame")
+local initialized = false
 
-local TRACKED_EVENTS = {
-    "ADDON_LOADED",
-    "COMBAT_LOG_EVENT_UNFILTERED",
-    "BOSS_KILL",
-    "VIGNETTE_MINIMAP_UPDATED",
-    "PLAYER_TARGET_CHANGED",
-    "UPDATE_MOUSEOVER_UNIT",
-    "CRITERIA_EARNED",
-}
-for _, ev in ipairs(TRACKED_EVENTS) do
-    eventFrame:RegisterEvent(ev)
+-- ADDON_LOADED: init DB and build UI
+EventRegistry:RegisterFrameEventAndCallback("ADDON_LOADED", function(event, name)
+    if name ~= ADDON_NAME then return end
+
+    db = TwilightTrackerDB
+    if not db.kills then db.kills = {} end
+    BuildUI()
+    if db.hidden then mainFrame:Hide() end
+    initialized = true
+
+    local tomtomNote = HasTomTom()
+        and Col("TomTom", C_GREEN) .. Col(" detected - click rows for arrow waypoints", C_DIM)
+        or Col("Click any row to set a map waypoint + tracking arrow", C_DIM)
+    print(Col("[Twilight Tracker]", C_GOLD) .. " loaded  |  " ..
+        Col("/tt", C_CYAN) .. " toggle  |  " ..
+        Col("/tt help", C_CYAN) .. " cmds")
+    print(Col("[Twilight Tracker]", C_GOLD) .. " " .. tomtomNote)
+end, ADDON_NAME)
+
+-- Safely register events - some may be protected in 12.0.0
+local function SafeRegister(event, callback)
+    pcall(EventRegistry.RegisterFrameEventAndCallback, EventRegistry, event, callback, ADDON_NAME)
 end
 
-eventFrame:SetScript("OnEvent", function(self, event, ...)
-
-    -- ADDON_LOADED: initialize
-    if event == "ADDON_LOADED" then
-        local name = ...
-        if name == ADDON_NAME then
-            db = TwilightTrackerDB
-            if not db.kills then db.kills = {} end
-            BuildUI()
-            if db.hidden then mainFrame:Hide() end
-
-            local tomtomNote = HasTomTom()
-                and Col("TomTom", C_GREEN) .. Col(" detected - click rows for arrow waypoints", C_DIM)
-                or Col("Click any row to set a map waypoint + tracking arrow", C_DIM)
-            print(Col("[Twilight Tracker]", C_GOLD) .. " loaded  |  " ..
-                Col("/tt", C_CYAN) .. " toggle  |  " ..
-                Col("/tt help", C_CYAN) .. " cmds")
-            print(Col("[Twilight Tracker]", C_GOLD) .. " " .. tomtomNote)
-            self:UnregisterEvent("ADDON_LOADED")
+-- Combat log: primary kill detection
+SafeRegister("COMBAT_LOG_EVENT_UNFILTERED", function()
+    if not initialized then return end
+    local _, subEvent, _, _, _, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
+    if (subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL") and destGUID then
+        local npcID = GetNPCIDFromGUID(destGUID)
+        if npcID and NPC_TO_INDEX[npcID] then
+            RegisterKill(npcID)
         end
-
-    -- COMBAT_LOG: primary kill detection
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local _, subEvent, _, _, _, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
-        if (subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL") and destGUID then
-            local npcID = GetNPCIDFromGUID(destGUID)
-            if npcID and NPC_TO_INDEX[npcID] then
-                RegisterKill(npcID)
-            end
-        end
-
-    -- BOSS_KILL: backup for boss-flagged rares
-    elseif event == "BOSS_KILL" then
-        local _, encounterName = ...
-        if encounterName then
-            local npcID = NAME_TO_NPC[encounterName:lower()]
-            if npcID then RegisterKill(npcID) end
-        end
-
-    -- VIGNETTE: detect rare icon on minimap (not a kill, just awareness)
-    elseif event == "VIGNETTE_MINIMAP_UPDATED" then
-        local vignetteGUID = ...
-        if vignetteGUID and C_VignetteInfo then
-            local info = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
-            if info and info.objectGUID then
-                local npcID = GetNPCIDFromGUID(info.objectGUID)
-                if npcID and NPC_TO_INDEX[npcID] then
-                    if UpdateUI then UpdateUI() end
-                end
-            end
-        end
-
-    -- TARGET / MOUSEOVER: detect dead rares + general awareness
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        if UnitExists("target") then
-            local guid = UnitGUID("target")
-            local npcID = GetNPCIDFromGUID(guid)
-            if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("target") then
-                RegisterKill(npcID)
-            end
-        end
-
-    elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        if UnitExists("mouseover") then
-            local guid = UnitGUID("mouseover")
-            local npcID = GetNPCIDFromGUID(guid)
-            if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("mouseover") then
-                RegisterKill(npcID)
-            end
-        end
-
-    elseif event == "CRITERIA_EARNED" then
-        if UpdateUI then UpdateUI() end
     end
 end)
 
--- Tick every 0.5 seconds
-local tickElapsed = 0
-eventFrame:SetScript("OnUpdate", function(self, elapsed)
-    tickElapsed = tickElapsed + elapsed
-    if tickElapsed >= 0.5 then
-        tickElapsed = 0
-        if UpdateUI then UpdateUI() end
+-- Boss kill: backup for boss-flagged rares
+SafeRegister("BOSS_KILL", function(event, encounterID, encounterName)
+    if not initialized then return end
+    if encounterName then
+        local npcID = NAME_TO_NPC[encounterName:lower()]
+        if npcID then RegisterKill(npcID) end
     end
+end)
+
+-- Vignette: UI refresh when rare icon appears on minimap
+SafeRegister("VIGNETTE_MINIMAP_UPDATED", function(event, vignetteGUID)
+    if not initialized then return end
+    if vignetteGUID and C_VignetteInfo then
+        local info = C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+        if info and info.objectGUID then
+            local npcID = GetNPCIDFromGUID(info.objectGUID)
+            if npcID and NPC_TO_INDEX[npcID] then
+                if UpdateUI then UpdateUI() end
+            end
+        end
+    end
+end)
+
+-- Target: detect dead rares
+SafeRegister("PLAYER_TARGET_CHANGED", function()
+    if not initialized then return end
+    if UnitExists("target") then
+        local guid = UnitGUID("target")
+        local npcID = GetNPCIDFromGUID(guid)
+        if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("target") then
+            RegisterKill(npcID)
+        end
+    end
+end)
+
+-- Mouseover: detect dead rares
+SafeRegister("UPDATE_MOUSEOVER_UNIT", function()
+    if not initialized then return end
+    if UnitExists("mouseover") then
+        local guid = UnitGUID("mouseover")
+        local npcID = GetNPCIDFromGUID(guid)
+        if npcID and NPC_TO_INDEX[npcID] and UnitIsDead("mouseover") then
+            RegisterKill(npcID)
+        end
+    end
+end)
+
+-- Achievement criteria
+SafeRegister("CRITERIA_EARNED", function()
+    if not initialized then return end
+    if UpdateUI then UpdateUI() end
+end)
+
+-- Tick for countdown updates (C_Timer avoids frame-based OnUpdate)
+C_Timer.NewTicker(0.5, function()
+    if UpdateUI then UpdateUI() end
 end)
 
 -------------------------------------------------------------------------------
