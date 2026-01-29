@@ -46,8 +46,8 @@ local VOICE_OF_ECLIPSE = {
 
 local NUM_RARES    = #ROTATION       -- 18
 local TOTAL_RARES  = NUM_RARES + 1   -- +1 for Voice of the Eclipse
-local SLOT_SECONDS = 600             -- 10 minutes per rare
-local CYCLE_SECONDS = NUM_RARES * SLOT_SECONDS  -- 10800 = 3 hours
+local SLOT_SECONDS = 300             -- 5 minutes per rare
+local CYCLE_SECONDS = NUM_RARES * SLOT_SECONDS  -- 5400 = 90 minutes
 local MAP_ID       = 241             -- Twilight Highlands
 
 -- EST offset from UTC (seconds). EST = UTC - 5h.
@@ -164,16 +164,16 @@ end
 
 -------------------------------------------------------------------------------
 -- Deterministic rotation schedule
--- The 18 rares cycle every 3 hours. Rare #2 spawns at exactly :00 EST
--- (the top of every 3-hour window: 0:00, 3:00, 6:00, ...).
--- Rare #1 spawns at :50 of the preceding hour (i.e. 10 min before).
+-- The 18 rares cycle every 90 minutes. Rare #2 spawns at exactly :00 EST
+-- (the top of every 90-min window).
+-- Rare #1 spawns at :55 of the preceding slot (i.e. 5 min before).
 -- Slot formula: slot 0 => rare #2, slot 1 => rare #3, ... slot 17 => rare #1
 -------------------------------------------------------------------------------
 local function GetCurrentRareInfo()
     local utcNow = GetServerTime()
     local estNow = utcNow + EST_OFFSET
     local secSinceMidnight = estNow % 86400
-    local cyclePos = secSinceMidnight % CYCLE_SECONDS  -- 0..10799
+    local cyclePos = secSinceMidnight % CYCLE_SECONDS  -- 0..5399
     local slot = math.floor(cyclePos / SLOT_SECONDS)    -- 0..17
     local secIntoSlot = cyclePos - (slot * SLOT_SECONDS)
     local remaining = SLOT_SECONDS - secIntoSlot
